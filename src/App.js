@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import FeedbackOptions from './FeedbackOptions';
 import Statistics from './Statistics';
 import Section from './Section';
@@ -11,10 +11,10 @@ export default function App() {
 
   const option = { good, neutral, bad };
 
-  const onLeaveFeedback = option => {
-    // const name = e.target.name;
-
-    switch (option) {
+  const onLeaveFeedback = useCallback(e => {
+    const name = e.target.name;
+    console.log(name);
+    switch (name) {
       case 'good':
         setGood(prevGood => prevGood + 1);
         break;
@@ -30,29 +30,27 @@ export default function App() {
       default:
         break;
     }
-  };
+  }, []);
 
   const total = good + neutral + bad;
 
-  // const positivePercent = () => {
-  //   // const total = this.countTotalFeedback();
-  //   // const { good } = this.state;
+  useEffect(() => {
+    document.title = `Positive: ${positivePercent()}%`;
+  });
 
-  //   const percent = Math.round((100 * good) / total);
-
-  //   return percent > 0 ? percent : 0;
-  // };
-  const positivePercent = Math.round((100 * good) / total);
+  const positivePercent = useCallback(() => {
+    const percent = Math.round((100 * good) / total);
+    return percent > 0 ? percent : 0;
+  }, [good, total]);
 
   return (
-    <>
+    <div className="section">
       <Section title="Please leave feedback">
         <FeedbackOptions
           options={Object.keys(option)}
           onLeaveFeedback={onLeaveFeedback}
         />
       </Section>
-
       {total === 0 ? (
         <Notification message="No feedback given"></Notification>
       ) : (
@@ -62,11 +60,11 @@ export default function App() {
             neutral={neutral}
             bad={bad}
             total={total}
-            positivePercentage={positivePercent > 0 ? positivePercent : 0}
+            positivePercentage={positivePercent()}
           ></Statistics>
         </Section>
       )}
-    </>
+    </div>
   );
 }
 
